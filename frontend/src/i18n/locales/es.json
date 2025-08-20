@@ -1,0 +1,155 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "warning": "Advertencia",
+    "info": "Información",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "view": "Ver",
+    "download": "Descargar",
+    "upload": "Subir",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "close": "Cerrar",
+    "open": "Abrir",
+    "yes": "Sí",
+    "no": "No",
+    "ok": "OK",
+    "back": "Atrás",
+    "continue": "Continuar",
+    "submit": "Enviar",
+    "reset": "Restablecer",
+    "clear": "Limpiar"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "dashboard": "Panel de Control",
+    "analysis": "Análisis",
+    "skinAnalysis": "Análisis de Piel",
+    "radiologyAnalysis": "Análisis Radiológico",
+    "triage": "Triaje Virtual",
+    "results": "Resultados",
+    "reports": "Informes",
+    "profile": "Perfil",
+    "settings": "Configuración",
+    "help": "Ayuda",
+    "about": "Acerca de",
+    "login": "Iniciar Sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar Sesión",
+    "admin": "Panel de Administración"
+  },
+  "auth": {
+    "login": {
+      "title": "Iniciar Sesión en MedAI Copilot",
+      "subtitle": "Accede a tu asistente inteligente de salud",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "rememberMe": "Recordarme",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "loginButton": "Iniciar Sesión",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Regístrate aquí"
+    },
+    "register": {
+      "title": "Crear Tu Cuenta",
+      "subtitle": "Únete a MedAI Copilot para asistencia inteligente de salud",
+      "fullName": "Nombre Completo",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar Contraseña",
+      "role": "Rol",
+      "roles": {
+        "patient": "Paciente",
+        "doctor": "Profesional de la Salud"
+      },
+      "medicalLicense": "Número de Licencia Médica",
+      "language": "Idioma Preferido",
+      "registerButton": "Crear Cuenta",
+      "hasAccount": "¿Ya tienes una cuenta?",
+      "signIn": "Inicia sesión aquí"
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenido de nuevo, {{name}}",
+    "subtitle": "Tu asistente inteligente de salud",
+    "quickActions": "Acciones Rápidas",
+    "recentAnalyses": "Análisis Recientes",
+    "modules": {
+      "skinAnalysis": {
+        "title": "Detección de Cáncer de Piel",
+        "description": "Sube una imagen de lesión cutánea para análisis con IA",
+        "action": "Iniciar Análisis"
+      },
+      "radiologyAnalysis": {
+        "title": "Copiloto de Radiología",
+        "description": "Analiza radiografías de tórax y tomografías para anomalías",
+        "action": "Subir Escaneo"
+      },
+      "triage": {
+        "title": "Asistente de Triaje Virtual",
+        "description": "Describe síntomas para evaluación inteligente de triaje",
+        "action": "Iniciar Triaje"
+      }
+    }
+  },
+  "skinAnalysis": {
+    "title": "Detección de Cáncer de Piel",
+    "subtitle": "Análisis de lesiones cutáneas con IA",
+    "conditions": {
+      "melanoma": "Melanoma",
+      "melanocytic_nevus": "Nevus Melanocítico",
+      "basal_cell_carcinoma": "Carcinoma Basocelular",
+      "actinic_keratosis": "Queratosis Actínica",
+      "benign_keratosis": "Queratosis Benigna",
+      "dermatofibroma": "Dermatofibroma",
+      "vascular_lesion": "Lesión Vascular",
+      "squamous_cell_carcinoma": "Carcinoma Escamocelular"
+    }
+  },
+  "radiologyAnalysis": {
+    "title": "Análisis Radiológico",
+    "subtitle": "Análisis de imágenes médicas con IA",
+    "pathologies": {
+      "pneumonia": "Neumonía",
+      "pneumothorax": "Neumotórax",
+      "cardiomegaly": "Cardiomegalia",
+      "pleural_effusion": "Derrame Pleural",
+      "atelectasis": "Atelectasia",
+      "consolidation": "Consolidación",
+      "edema": "Edema Pulmonar",
+      "emphysema": "Enfisema",
+      "fibrosis": "Fibrosis Pulmonar",
+      "mass": "Masa",
+      "nodule": "Nódulo",
+      "infiltration": "Infiltración"
+    }
+  },
+  "triage": {
+    "title": "Asistente de Triaje Virtual",
+    "subtitle": "Evaluación inteligente de síntomas y orientación",
+    "urgencyLevels": {
+      "routine": "Atención de Rutina",
+      "urgent": "Atención Urgente",
+      "emergency": "Atención de Emergencia"
+    }
+  },
+  "medical": {
+    "disclaimer": "Este análisis de IA es solo para fines informativos y no debe reemplazar el consejo médico profesional. Siempre consulte con profesionales de la salud calificados para problemas médicos.",
+    "emergency": "En caso de emergencia médica, llame a los servicios de emergencia inmediatamente.",
+    "severityLevels": {
+      "low": "Bajo",
+      "medium": "Medio",
+      "high": "Alto",
+      "critical": "Crítico"
+    }
+  }
+}

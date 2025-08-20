@@ -1,0 +1,15 @@
+{
+  "common": {
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg"
+  },
+  "navigation": {
+    "home": "Startseite",
+    "dashboard": "Dashboard",
+    "login": "Anmelden"
+  },
+  "medical": {
+    "disclaimer": "Diese KI-Analyse dient nur zu Informationszwecken und sollte keine professionelle medizinische Beratung ersetzen."
+  }
+}

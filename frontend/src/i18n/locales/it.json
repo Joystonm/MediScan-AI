@@ -1,0 +1,15 @@
+{
+  "common": {
+    "loading": "Caricamento...",
+    "error": "Errore",
+    "success": "Successo"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "login": "Accedi"
+  },
+  "medical": {
+    "disclaimer": "Questa analisi AI è solo a scopo informativo e non dovrebbe sostituire il consiglio medico professionale."
+  }
+}

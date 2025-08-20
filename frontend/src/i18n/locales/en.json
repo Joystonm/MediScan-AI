@@ -1,0 +1,405 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "open": "Open",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "back": "Back",
+    "continue": "Continue",
+    "submit": "Submit",
+    "reset": "Reset",
+    "clear": "Clear",
+    "select": "Select",
+    "choose": "Choose",
+    "browse": "Browse",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "copy": "Copy",
+    "share": "Share",
+    "print": "Print",
+    "export": "Export",
+    "import": "Import"
+  },
+  "navigation": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "analysis": "Analysis",
+    "skinAnalysis": "Skin Analysis",
+    "radiologyAnalysis": "Radiology Analysis",
+    "triage": "Virtual Triage",
+    "results": "Results",
+    "reports": "Reports",
+    "profile": "Profile",
+    "settings": "Settings",
+    "help": "Help",
+    "about": "About",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "admin": "Admin Panel"
+  },
+  "auth": {
+    "login": {
+      "title": "Login to MedAI Copilot",
+      "subtitle": "Access your intelligent healthcare assistant",
+      "email": "Email Address",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "loginButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here",
+      "errors": {
+        "invalidCredentials": "Invalid email or password",
+        "accountLocked": "Account is locked",
+        "emailRequired": "Email is required",
+        "passwordRequired": "Password is required",
+        "invalidEmail": "Please enter a valid email address"
+      }
+    },
+    "register": {
+      "title": "Create Your Account",
+      "subtitle": "Join MedAI Copilot for intelligent healthcare assistance",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "role": "Role",
+      "roles": {
+        "patient": "Patient",
+        "doctor": "Healthcare Professional"
+      },
+      "medicalLicense": "Medical License Number",
+      "language": "Preferred Language",
+      "terms": "I agree to the Terms of Service and Privacy Policy",
+      "registerButton": "Create Account",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in here",
+      "errors": {
+        "nameRequired": "Full name is required",
+        "emailRequired": "Email is required",
+        "passwordRequired": "Password is required",
+        "passwordMismatch": "Passwords do not match",
+        "weakPassword": "Password must be at least 8 characters",
+        "licenseRequired": "Medical license is required for healthcare professionals",
+        "termsRequired": "You must agree to the terms and conditions"
+      }
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}",
+    "subtitle": "Your intelligent healthcare assistant",
+    "quickActions": "Quick Actions",
+    "recentAnalyses": "Recent Analyses",
+    "statistics": "Statistics",
+    "modules": {
+      "skinAnalysis": {
+        "title": "Skin Cancer Detection",
+        "description": "Upload a skin lesion image for AI-powered analysis",
+        "action": "Start Analysis"
+      },
+      "radiologyAnalysis": {
+        "title": "Radiology Copilot",
+        "description": "Analyze chest X-rays and CT scans for anomalies",
+        "action": "Upload Scan"
+      },
+      "triage": {
+        "title": "Virtual Triage Assistant",
+        "description": "Describe symptoms for intelligent triage assessment",
+        "action": "Start Triage"
+      }
+    },
+    "stats": {
+      "totalAnalyses": "Total Analyses",
+      "thisMonth": "This Month",
+      "urgentCases": "Urgent Cases",
+      "accuracy": "AI Accuracy"
+    }
+  },
+  "skinAnalysis": {
+    "title": "Skin Cancer Detection",
+    "subtitle": "AI-powered analysis of skin lesions",
+    "upload": {
+      "title": "Upload Skin Image",
+      "description": "Upload a clear image of the skin lesion for analysis",
+      "dragDrop": "Drag and drop an image here, or click to browse",
+      "requirements": "Requirements:",
+      "reqList": [
+        "Clear, well-lit image",
+        "Lesion centered in frame",
+        "Avoid shadows and reflections",
+        "Supported formats: JPG, PNG, BMP"
+      ],
+      "maxSize": "Maximum file size: 10MB"
+    },
+    "analysis": {
+      "analyzing": "Analyzing skin lesion...",
+      "complete": "Analysis Complete",
+      "confidence": "Confidence",
+      "riskLevel": "Risk Level",
+      "topPrediction": "Primary Finding"
+    },
+    "results": {
+      "characteristics": "Lesion Characteristics",
+      "asymmetry": "Asymmetry",
+      "border": "Border Irregularity",
+      "color": "Color Variation",
+      "diameter": "Diameter",
+      "evolution": "Evolution Risk",
+      "predictions": "Detailed Predictions",
+      "recommendations": "Recommendations",
+      "nextSteps": "Next Steps"
+    },
+    "conditions": {
+      "melanoma": "Melanoma",
+      "melanocytic_nevus": "Melanocytic Nevus",
+      "basal_cell_carcinoma": "Basal Cell Carcinoma",
+      "actinic_keratosis": "Actinic Keratosis",
+      "benign_keratosis": "Benign Keratosis",
+      "dermatofibroma": "Dermatofibroma",
+      "vascular_lesion": "Vascular Lesion",
+      "squamous_cell_carcinoma": "Squamous Cell Carcinoma"
+    }
+  },
+  "radiologyAnalysis": {
+    "title": "Radiology Analysis",
+    "subtitle": "AI-powered analysis of medical imaging",
+    "scanTypes": {
+      "chest_xray": "Chest X-ray",
+      "ct_scan": "CT Scan",
+      "mri": "MRI Scan"
+    },
+    "upload": {
+      "title": "Upload Medical Image",
+      "selectType": "Select scan type",
+      "clinicalHistory": "Clinical History (Optional)",
+      "clinicalHistoryPlaceholder": "Enter relevant clinical history, symptoms, or previous findings...",
+      "requirements": "Image Requirements:",
+      "reqList": [
+        "High-resolution medical images",
+        "DICOM format preferred",
+        "Proper patient positioning",
+        "Clear anatomical structures"
+      ]
+    },
+    "analysis": {
+      "analyzing": "Analyzing medical image...",
+      "scanType": "Scan Type",
+      "urgencyLevel": "Urgency Level",
+      "overallAssessment": "Overall Assessment"
+    },
+    "results": {
+      "findings": "Findings",
+      "clinicalSummary": "Clinical Summary",
+      "recommendations": "Clinical Recommendations",
+      "differentialDiagnosis": "Differential Diagnosis",
+      "urgencyLevels": {
+        "routine": "Routine",
+        "urgent": "Urgent",
+        "emergency": "Emergency"
+      }
+    },
+    "pathologies": {
+      "pneumonia": "Pneumonia",
+      "pneumothorax": "Pneumothorax",
+      "cardiomegaly": "Cardiomegaly",
+      "pleural_effusion": "Pleural Effusion",
+      "atelectasis": "Atelectasis",
+      "consolidation": "Consolidation",
+      "edema": "Pulmonary Edema",
+      "emphysema": "Emphysema",
+      "fibrosis": "Pulmonary Fibrosis",
+      "mass": "Mass",
+      "nodule": "Nodule",
+      "infiltration": "Infiltration"
+    }
+  },
+  "triage": {
+    "title": "Virtual Triage Assistant",
+    "subtitle": "Intelligent symptom assessment and guidance",
+    "assessment": {
+      "title": "Symptom Assessment",
+      "symptoms": "Describe your symptoms",
+      "symptomsPlaceholder": "Please describe your symptoms in detail...",
+      "duration": "How long have you had these symptoms?",
+      "severity": "Rate your discomfort (1-10)",
+      "age": "Age",
+      "gender": "Gender",
+      "medicalHistory": "Medical History",
+      "medications": "Current Medications",
+      "submit": "Start Assessment"
+    },
+    "chat": {
+      "title": "Chat with Triage Assistant",
+      "placeholder": "Type your message here...",
+      "send": "Send",
+      "followUpQuestions": "Follow-up Questions",
+      "additionalInfo": "Additional Information Needed"
+    },
+    "results": {
+      "urgencyLevel": "Urgency Level",
+      "confidence": "Assessment Confidence",
+      "possibleConditions": "Possible Conditions",
+      "recommendations": "Recommendations",
+      "nextSteps": "Next Steps",
+      "redFlags": "Warning Signs",
+      "careLevel": "Recommended Care Level",
+      "waitTime": "Estimated Wait Time"
+    },
+    "urgencyLevels": {
+      "routine": "Routine Care",
+      "urgent": "Urgent Care",
+      "emergency": "Emergency Care"
+    }
+  },
+  "results": {
+    "title": "Analysis Results",
+    "analysisId": "Analysis ID",
+    "timestamp": "Date & Time",
+    "type": "Analysis Type",
+    "status": "Status",
+    "actions": "Actions",
+    "viewDetails": "View Details",
+    "generateReport": "Generate Report",
+    "shareResults": "Share Results",
+    "downloadImage": "Download Image",
+    "noResults": "No analysis results found",
+    "loadMore": "Load More Results"
+  },
+  "reports": {
+    "title": "Medical Reports",
+    "generate": {
+      "title": "Generate Report",
+      "selectAnalyses": "Select Analyses",
+      "reportType": "Report Type",
+      "includeImages": "Include Images",
+      "language": "Report Language",
+      "doctorNotes": "Doctor's Notes",
+      "generate": "Generate Report"
+    },
+    "list": {
+      "reportId": "Report ID",
+      "createdAt": "Created",
+      "expiresAt": "Expires",
+      "analysisCount": "Analyses",
+      "download": "Download",
+      "delete": "Delete"
+    },
+    "types": {
+      "comprehensive": "Comprehensive Report",
+      "summary": "Summary Report",
+      "clinical": "Clinical Report"
+    }
+  },
+  "profile": {
+    "title": "User Profile",
+    "personalInfo": "Personal Information",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "role": "Role",
+    "medicalLicense": "Medical License",
+    "language": "Preferred Language",
+    "accountSettings": "Account Settings",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updateProfile": "Update Profile",
+    "updatePassword": "Update Password"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": "Language",
+    "notifications": "Notifications",
+    "emailNotifications": "Email Notifications",
+    "pushNotifications": "Push Notifications",
+    "privacy": "Privacy",
+    "dataSharing": "Data Sharing",
+    "analytics": "Analytics",
+    "security": "Security",
+    "twoFactor": "Two-Factor Authentication",
+    "sessions": "Active Sessions"
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "users": "User Management",
+    "analytics": "Analytics",
+    "system": "System Status",
+    "reports": "System Reports",
+    "userStats": {
+      "totalUsers": "Total Users",
+      "activeUsers": "Active Users",
+      "newUsers": "New Users This Month",
+      "doctorUsers": "Healthcare Professionals"
+    }
+  },
+  "errors": {
+    "generic": "An error occurred. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found.",
+    "serverError": "Server error. Please try again later.",
+    "fileUpload": "File upload failed. Please try again.",
+    "fileTooLarge": "File is too large. Maximum size is {{maxSize}}.",
+    "invalidFileType": "Invalid file type. Supported formats: {{formats}}.",
+    "analysisError": "Analysis failed. Please try again.",
+    "reportError": "Report generation failed. Please try again."
+  },
+  "medical": {
+    "disclaimer": "This AI analysis is for informational purposes only and should not replace professional medical advice. Always consult with qualified healthcare professionals for medical concerns.",
+    "emergency": "In case of medical emergency, call emergency services immediately.",
+    "severityLevels": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "riskLevels": {
+      "low": "Low Risk",
+      "medium": "Medium Risk",
+      "high": "High Risk",
+      "critical": "Critical Risk"
+    }
+  },
+  "help": {
+    "title": "Help & Support",
+    "faq": "Frequently Asked Questions",
+    "contact": "Contact Support",
+    "documentation": "Documentation",
+    "tutorials": "Video Tutorials",
+    "systemRequirements": "System Requirements"
+  },
+  "about": {
+    "title": "About MedAI Copilot",
+    "description": "MedAI Copilot is an AI-powered healthcare assistant that provides intelligent analysis of medical images and symptoms.",
+    "features": "Features",
+    "team": "Our Team",
+    "version": "Version {{version}}"
+  }
+}

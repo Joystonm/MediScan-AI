@@ -1,0 +1,68 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "view": "Voir",
+    "download": "Télécharger",
+    "upload": "Téléverser"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "dashboard": "Tableau de Bord",
+    "analysis": "Analyse",
+    "skinAnalysis": "Analyse de Peau",
+    "radiologyAnalysis": "Analyse Radiologique",
+    "triage": "Triage Virtuel",
+    "results": "Résultats",
+    "reports": "Rapports",
+    "profile": "Profil",
+    "settings": "Paramètres",
+    "help": "Aide",
+    "about": "À Propos",
+    "login": "Connexion",
+    "register": "S'inscrire",
+    "logout": "Déconnexion"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion à MedAI Copilot",
+      "subtitle": "Accédez à votre assistant de santé intelligent",
+      "email": "Adresse E-mail",
+      "password": "Mot de Passe",
+      "loginButton": "Se Connecter"
+    },
+    "register": {
+      "title": "Créer Votre Compte",
+      "fullName": "Nom Complet",
+      "email": "Adresse E-mail",
+      "password": "Mot de Passe",
+      "registerButton": "Créer un Compte"
+    }
+  },
+  "skinAnalysis": {
+    "title": "Détection du Cancer de la Peau",
+    "conditions": {
+      "melanoma": "Mélanome",
+      "melanocytic_nevus": "Naevus Mélanocytaire",
+      "basal_cell_carcinoma": "Carcinome Basocellulaire"
+    }
+  },
+  "radiologyAnalysis": {
+    "pathologies": {
+      "pneumonia": "Pneumonie",
+      "pneumothorax": "Pneumothorax",
+      "cardiomegaly": "Cardiomégalie"
+    }
+  },
+  "medical": {
+    "disclaimer": "Cette analyse IA est à des fins informatives uniquement et ne doit pas remplacer les conseils médicaux professionnels."
+  }
+}
