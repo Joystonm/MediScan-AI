@@ -37,8 +37,7 @@ MediScan-AI is a comprehensive medical diagnosis assistance platform that levera
 │   │   ├── services/               # Business logic
 │   │   ├── models/                 # AI model loaders
 │   │   └── utils/                  # Utilities
-│   ├── requirements.txt
-│   └── Dockerfile
+│   └── requirements.txt
 │
 ├── frontend/                       # React.js frontend
 │   ├── src/
@@ -50,18 +49,17 @@ MediScan-AI is a comprehensive medical diagnosis assistance platform that levera
 │   └── tailwind.config.js
 │
 ├── tests/                          # Test suites
-├── docker-compose.yml              # Container orchestration
 └── README.md
 ```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Docker** and **Docker Compose**
-- **Node.js** 18+ (for local development)
-- **Python** 3.11+ (for local development)
+- **Node.js** 18+ (Download from [nodejs.org](https://nodejs.org/))
+- **Python** 3.11+ (or Python 3.10+)
+- **Git**
 
-### Using Docker (Recommended)
+### Setup Instructions
 
 1. **Clone the repository**
    ```bash
@@ -71,26 +69,39 @@ MediScan-AI is a comprehensive medical diagnosis assistance platform that levera
 
 2. **Set up environment variables**
    ```bash
-   cp .env.example .env
-   # Edit .env with your API keys (working keys included for development)
+   # Copy the example file
+   cp .env.example .env.local
+   # Edit .env.local with your real API keys
+   # Note: .env.local is ignored by git for security
    ```
 
-3. **Start the application**
+3. **Install and run the backend**
    ```bash
-   docker-compose up -d
+   cd backend
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
-4. **Access the application**
+4. **Install and run the frontend** (in a new terminal)
+   ```bash
+   cd frontend
+   npm install
+   npm start
+   ```
+
+5. **Access the application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
 
-### Local Development
+### Development Setup
 
 #### Backend Setup
 ```bash
 cd backend
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
@@ -260,30 +271,41 @@ To add a new AI model:
    # Configure production settings
    ```
 
-2. **Deploy with Docker**
+2. **Build and deploy the application**
    ```bash
-   docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+   # Backend deployment
+   cd backend
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+   
+   # Frontend deployment
+   cd ../frontend
+   npm install
+   npm run build
+   # Serve the build folder with a web server like Nginx or Apache
    ```
 
-3. **Set up reverse proxy** (Nginx configuration included)
+3. **Set up reverse proxy** (Nginx configuration recommended)
 
 4. **Configure SSL certificates**
 
 ### Cloud Deployment
 
 #### AWS
-- Use **ECS** or **EKS** for container orchestration
-- **S3** for model storage
+- Use **EC2** instances with **Application Load Balancer**
+- **S3** for model storage and static assets
 - **RDS** for database
 - **CloudFront** for CDN
 
 #### Google Cloud
-- Use **Cloud Run** or **GKE**
+- Use **Compute Engine** or **App Engine**
 - **Cloud Storage** for models
 - **Cloud SQL** for database
 
 #### Azure
-- Use **Container Instances** or **AKS**
+- Use **Virtual Machines** or **App Service**
 - **Blob Storage** for models
 - **Azure Database** for PostgreSQL
 

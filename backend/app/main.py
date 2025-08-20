@@ -5,6 +5,16 @@ from fastapi.staticfiles import StaticFiles
 import os
 import logging
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+# Load environment variables
+# Try .env.local first (for development), then fall back to .env
+if os.path.exists('.env.local'):
+    load_dotenv('.env.local')
+    print("Loaded environment from .env.local")
+else:
+    load_dotenv('.env')
+    print("Loaded environment from .env")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
