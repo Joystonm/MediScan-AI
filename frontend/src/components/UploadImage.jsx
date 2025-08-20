@@ -40,23 +40,28 @@ const UploadImage = ({ onImageUpload, analysisType = 'skin' }) => {
       formData.append('file', uploadedImage.file);
 
       const endpoint = analysisType === 'skin' 
-        ? '/api/v1/skin-analysis' 
-        : '/api/v1/radiology-analysis';
+        ? '/api/v1/skin-analysis/analyze' 
+        : '/api/v1/radiology-analysis/analyze';
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}${endpoint}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}${endpoint}`, {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Analysis failed');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Analysis failed');
       }
 
       const result = await response.json();
+      
+      // Pass both result and image data to parent
       onImageUpload(result, uploadedImage);
+      
     } catch (error) {
       console.error('Analysis error:', error);
-      // Handle error (show notification, etc.)
+      // Show user-friendly error message
+      alert(`Analysis failed: ${error.message}. Please try again.`);
     } finally {
       setIsAnalyzing(false);
     }

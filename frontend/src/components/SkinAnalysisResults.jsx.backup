@@ -1,0 +1,718 @@
+import React, { useState, useEffect } from 'react';
+import './SkinAnalysisResults.css';
+
+const SkinAnalysisResults = ({ analysisResult, uploadedImage, isLoading: externalLoading = false }) => {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [progressiveData, setProgressiveData] = useState({
+    aiSummary: null,
+    medicalResources: null,
+    keywords: null
+  });
+
+  // Use external loading state or internal loading state
+  const isLoading = externalLoading;
+
+  // Effect to handle progressive data updates
+  useEffect(() => {
+    if (analysisResult) {
+      // Always use the analysis result data immediately, don't wait for status
+      const hasAiSummary = analysisResult.ai_summary && 
+        (analysisResult.ai_summary.summary || analysisResult.ai_summary.explanation);
+      
+      const hasResources = analysisResult.medical_resources && 
+        analysisResult.medical_resources.medical_articles && 
+        analysisResult.medical_resources.medical_articles.length > 0;
+      
+      const hasKeywords = analysisResult.keywords && 
+        Object.keys(analysisResult.keywords).some(key => 
+          key !== 'extracted_at' && key !== 'status' && 
+          Array.isArray(analysisResult.keywords[key]) && 
+          analysisResult.keywords[key].length > 0
+        );
+
+      // Set progressive data immediately if we have content
+      setProgressiveData({
+        aiSummary: hasAiSummary ? analysisResult.ai_summary : null,
+        medicalResources: hasResources ? analysisResult.medical_resources : null,
+        keywords: hasKeywords ? analysisResult.keywords : null
+      });
+    }
+  }, [analysisResult]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="analysis-loading">
+        <div className="loading-content">
+          <div className="loading-spinner"></div>
+          <h3>Analyzing your image...</h3>
+          <p>Our AI is processing your skin lesion image and generating comprehensive insights.</p>
+          <div className="loading-progress">
+            <div className="progress-step active">
+              <span className="step-icon">🔬</span>
+              <span className="step-text">AI Analysis</span>
+            </div>
+            <div className="progress-step">
+              <span className="step-icon">🧠</span>
+              <span className="step-text">Generating Insights</span>
+            </div>
+            <div className="progress-step">
+              <span className="step-icon">📚</span>
+              <span className="step-text">Fetching Resources</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analysisResult) {
+    return (
+      <div className="analysis-placeholder">
+        <div className="placeholder-content">
+          <div className="placeholder-icon">🔬</div>
+          <h3>Upload an image to get started</h3>
+          <p>Our AI will analyze skin lesions and provide detailed medical insights</p>
+        </div>
+      </div>
+    );
+  }
+
+  const getRiskLevelColor = (riskLevel) => {
+    const colors = {
+      'low': '#10B981',      // Green
+      'medium': '#F59E0B',   // Amber
+      'high': '#EF4444',     // Red
+      'critical': '#DC2626'  // Dark Red
+    };
+    return colors[riskLevel?.toLowerCase()] || '#6B7280';
+  };
+
+  const getRiskLevelIcon = (riskLevel) => {
+    const icons = {
+      'low': '✅',
+      'medium': '⚠️',
+      'high': '🚨',
+      'critical': '🆘'
+    };
+    return icons[riskLevel?.toLowerCase()] || '❓';
+  };
+
+  const formatConfidence = (confidence) => {
+    return `${(confidence * 100).toFixed(1)}%`;
+  };
+
+  const formatAnalysisTime = () => {
+    // Calculate time from analysis_id timestamp or use current time
+    return "2.3s"; // Placeholder
+  };
+
+  return (
+    <div className="skin-analysis-results">
+      {/* Header Section */}
+      <div className="results-header">
+        <div className="header-main">
+          <h2>Skin Analysis Results</h2>
+          <div className="risk-badge" style={{ backgroundColor: getRiskLevelColor(analysisResult.risk_level) }}>
+            <span className="risk-icon">{getRiskLevelIcon(analysisResult.risk_level)}</span>
+            <span className="risk-text">{analysisResult.risk_level?.toUpperCase()} Risk</span>
+          </div>
+        </div>
+        
+        <div className="analysis-metadata">
+          <div className="metadata-item">
+            <span className="metadata-label">Analysis Time:</span>
+            <span className="metadata-value">{formatAnalysisTime()}</span>
+          </div>
+          <div className="metadata-item">
+            <span className="metadata-label">Analyzed Image:</span>
+            <span className="metadata-value">{uploadedImage?.name || 'Unknown'}</span>
+          </div>
+          <div className="metadata-item">
+            <span className="metadata-label">Dimensions:</span>
+            <span className="metadata-value">
+              {uploadedImage?.file ? `${uploadedImage.file.width || 'N/A'}x${uploadedImage.file.height || 'N/A'}` : 'N/A'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="results-tabs">
+        <button 
+          className={`tab-button ${activeTab === 'overview' ? 'active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'ai-insights' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ai-insights')}
+        >
+          AI Insights
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'resources' ? 'active' : ''}`}
+          onClick={() => setActiveTab('resources')}
+        >
+          Learn More
+        </button>
+        <button 
+          className={`tab-button ${activeTab === 'keywords' ? 'active' : ''}`}
+          onClick={() => setActiveTab('keywords')}
+        >
+          Key Terms
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="tab-content">
+        {activeTab === 'overview' && (
+          <OverviewTab 
+            analysisResult={analysisResult} 
+            uploadedImage={uploadedImage}
+          />
+        )}
+        
+        {activeTab === 'ai-insights' && (
+          <AIInsightsTab 
+            aiSummary={analysisResult.ai_summary}
+            isLoading={false}
+          />
+        )}
+        
+        {activeTab === 'resources' && (
+          <ResourcesTab 
+            medicalResources={analysisResult.medical_resources}
+            condition={analysisResult.top_prediction}
+            isLoading={false}
+          />
+        )}
+        
+        {activeTab === 'keywords' && (
+          <KeywordsTab 
+            keywords={analysisResult.keywords}
+            condition={analysisResult.top_prediction}
+            isLoading={false}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Overview Tab Component
+const OverviewTab = ({ analysisResult, uploadedImage }) => {
+  // Safety check for analysisResult
+  if (!analysisResult) {
+    return (
+      <div className="overview-tab">
+        <div className="loading-container">
+          <p>Loading analysis results...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="overview-tab">
+      <div className="overview-grid">
+        {/* Image and Predictions */}
+        <div className="overview-section">
+          <h3>Analysis Results</h3>
+          
+          {uploadedImage && (
+            <div className="analyzed-image">
+              <img src={uploadedImage.preview} alt="Analyzed lesion" />
+              {analysisResult.visual_overlay?.overlay_image_url && (
+                <div className="overlay-toggle">
+                  <button className="btn btn-secondary btn-sm">
+                    Show AI Overlay
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <div className="prediction-results">
+            <div className="top-prediction">
+              <h4>Top Prediction</h4>
+              <div className="prediction-item primary">
+                <span className="condition-name">{analysisResult.top_prediction}</span>
+                <span className="confidence">{formatConfidence(analysisResult.confidence)}</span>
+              </div>
+            </div>
+            
+            <div className="all-predictions">
+              <h4>All Predictions</h4>
+              <div className="predictions-list">
+                {Object.entries(analysisResult.predictions || {})
+                  .sort(([,a], [,b]) => b - a)
+                  .slice(0, 5)
+                  .map(([condition, probability]) => (
+                    <div key={condition} className="prediction-item">
+                      <span className="condition-name">{condition}</span>
+                      <div className="probability-bar">
+                        <div 
+                          className="probability-fill"
+                          style={{ width: `${probability * 100}%` }}
+                        ></div>
+                        <span className="probability-text">{formatConfidence(probability)}</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recommendations */}
+        <div className="overview-section">
+          <h3>Medical Recommendations</h3>
+          {/* Recommendations section only - ABCDE removed */}
+          
+          <div className="recommendations-section">
+            <h4>Medical Recommendations</h4>
+            <ul className="recommendations-list">
+              {(analysisResult.recommendations || []).map((rec, index) => (
+                <li key={index} className="recommendation-item">
+                  <span className="rec-icon">💡</span>
+                  <span className="rec-text">{rec}</span>
+                </li>
+              ))}
+            </ul>
+            
+            <h4>Next Steps</h4>
+            <ul className="next-steps-list">
+              {(analysisResult.next_steps || []).map((step, index) => (
+                <li key={index} className="next-step-item">
+                  <span className="step-number">{index + 1}</span>
+                  <span className="step-text">{step}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div className="analysis-id">
+        <small>Analysis ID: {analysisResult.analysis_id || 'Unknown'}</small>
+      </div>
+    </div>
+  );
+};
+
+// AI Insights Tab Component
+const AIInsightsTab = ({ aiSummary, isLoading }) => {
+  // Always show content if we have any data, ignore loading state
+  const hasSummary = aiSummary && (aiSummary.summary || aiSummary.explanation);
+  
+  if (!hasSummary) {
+    // Show a simple message instead of loading
+    return (
+      <div className="ai-insights-tab">
+        <div className="insight-section">
+          <h3>
+            <span className="section-icon">🧠</span>
+            AI Medical Summary
+          </h3>
+          <div className="insight-content">
+            <div className="summary-text">
+              AI insights are being processed. Please check back in a moment or refresh the page.
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ai-insights-tab">
+      {aiSummary.summary && (
+        <div className="insight-section">
+          <h3>
+            <span className="section-icon">🧠</span>
+            AI Medical Summary
+          </h3>
+          <div className="insight-content">
+            <div className="summary-text">
+              {aiSummary.summary}
+            </div>
+            {aiSummary.generated_at && (
+              <div className="generation-info">
+                <small>Generated: {new Date(aiSummary.generated_at).toLocaleString()}</small>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      {aiSummary.explanation && (
+        <div className="insight-section">
+          <h3>
+            <span className="section-icon">📚</span>
+            Condition Explanation
+          </h3>
+          <div className="insight-content">
+            <div className="explanation-text">
+              {aiSummary.explanation}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Show confidence and risk interpretations if available */}
+      {(aiSummary.confidence_interpretation || aiSummary.risk_interpretation) && (
+        <div className="insight-section">
+          <h3>
+            <span className="section-icon">📊</span>
+            Analysis Interpretation
+          </h3>
+          <div className="insight-content">
+            {aiSummary.confidence_interpretation && (
+              <div className="interpretation-item">
+                <h4>Confidence Level</h4>
+                <p>{aiSummary.confidence_interpretation}</p>
+              </div>
+            )}
+            {aiSummary.risk_interpretation && (
+              <div className="interpretation-item">
+                <h4>Risk Assessment</h4>
+                <p>{aiSummary.risk_interpretation}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      
+      <div className="disclaimer-section">
+        <div className="disclaimer">
+          <span className="disclaimer-icon">⚠️</span>
+          <div className="disclaimer-text">
+            <strong>Medical Disclaimer:</strong> This AI-generated content is for informational purposes only 
+            and should not replace professional medical advice, diagnosis, or treatment. Always consult with 
+            qualified healthcare professionals for medical concerns.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Resources Tab Component
+const ResourcesTab = ({ medicalResources, condition, isLoading }) => {
+  const hasResources = medicalResources && (
+    (medicalResources.reference_images && medicalResources.reference_images.length > 0) ||
+    (medicalResources.medical_articles && medicalResources.medical_articles.length > 0)
+  );
+
+  if (!hasResources) {
+    // Show simple message with useful links instead of loading
+    return (
+      <div className="resources-tab">
+        <div className="resource-section">
+          <h3>
+            <span className="section-icon">📚</span>
+            Medical Resources for {condition}
+          </h3>
+          <div className="resource-content">
+            <p>Here are trusted medical resources about {condition}:</p>
+            
+            <div className="general-resources">
+              <h4>Trusted Medical Sources:</h4>
+              <div className="resource-links">
+                <a href="https://www.aad.org/public/diseases/skin-cancer" target="_blank" rel="noopener noreferrer">
+                  American Academy of Dermatology - Skin Cancer Information
+                </a>
+                <a href="https://www.mayoclinic.org/diseases-conditions/skin-cancer/symptoms-causes/syc-20377605" target="_blank" rel="noopener noreferrer">
+                  Mayo Clinic - Skin Cancer Overview
+                </a>
+                <a href="https://www.skincancer.org/" target="_blank" rel="noopener noreferrer">
+                  Skin Cancer Foundation
+                </a>
+                <a href="https://dermnetnz.org/" target="_blank" rel="noopener noreferrer">
+                  DermNet NZ - Dermatology Resource
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="resources-tab">
+      {medicalResources.reference_images && medicalResources.reference_images.length > 0 && (
+        <h3>Gathering Resources for {condition}...</h3>
+        <p>Medical resources specific to {condition} are being gathered from trusted sources.</p>
+        <div className="fallback-content">
+          <h4>Trusted Medical Sources:</h4>
+          <ul>
+            <li>American Academy of Dermatology (AAD)</li>
+            <li>Mayo Clinic</li>
+            <li>DermNet NZ</li>
+            <li>Skin Cancer Foundation</li>
+            <li>PubMed Medical Literature</li>
+          </ul>
+          <div className="general-resources">
+            <h4>General Resources:</h4>
+            <div className="resource-links">
+              <a href="https://www.aad.org/public/diseases/skin-cancer" target="_blank" rel="noopener noreferrer">
+                AAD Skin Cancer Information
+              </a>
+              <a href="https://www.mayoclinic.org/diseases-conditions/skin-cancer/symptoms-causes/syc-20377605" target="_blank" rel="noopener noreferrer">
+                Mayo Clinic - Skin Cancer
+              </a>
+              <a href="https://www.skincancer.org/" target="_blank" rel="noopener noreferrer">
+                Skin Cancer Foundation
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="resources-tab">
+      {medicalResources.reference_images && medicalResources.reference_images.length > 0 && (
+        <div className="resource-section">
+          <h3>
+            <span className="section-icon">🖼️</span>
+            Reference Images
+          </h3>
+          <div className="reference-images-grid">
+            {medicalResources.reference_images.map((image, index) => (
+              <div key={index} className="reference-image-card">
+                <div className="image-container">
+                  <img 
+                    src={image.url} 
+                    alt={image.title || `Reference image ${index + 1}`}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                  <div className="image-placeholder" style={{ display: 'none' }}>
+                    <span>Image unavailable</span>
+                  </div>
+                </div>
+                <div className="image-info">
+                  <h4>{image.title || `Reference Image ${index + 1}`}</h4>
+                  <p>{image.description || `Clinical reference for ${condition}`}</p>
+                  <small>Source: {image.source || 'Medical Database'}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {medicalResources.medical_articles && medicalResources.medical_articles.length > 0 && (
+        <div className="resource-section">
+          <h3>
+            <span className="section-icon">📄</span>
+            Medical Articles & Research
+          </h3>
+          <div className="articles-list">
+            {medicalResources.medical_articles.map((article, index) => (
+              <div key={index} className="article-card">
+                <div className="article-header">
+                  <h4>
+                    <a 
+                      href={article.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="article-link"
+                    >
+                      {article.title || `Medical Article ${index + 1}`}
+                    </a>
+                  </h4>
+                  <div className="article-meta">
+                    <span className="article-source">{article.source || 'Medical Source'}</span>
+                    {article.published_date && (
+                      <span className="article-date">
+                        {new Date(article.published_date).toLocaleDateString()}
+                      </span>
+                    )}
+                    {article.relevance_score && (
+                      <span className="relevance-score">
+                        Relevance: {(article.relevance_score * 100).toFixed(0)}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="article-snippet">
+                  {article.snippet || `Medical information about ${condition}`}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {medicalResources.fetched_at && (
+        <div className="fetch-info">
+          <small>Resources updated: {new Date(medicalResources.fetched_at).toLocaleString()}</small>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Keywords Tab Component
+const KeywordsTab = ({ keywords, condition, isLoading }) => {
+  const hasKeywords = keywords && Object.keys(keywords).some(key => 
+    key !== 'extracted_at' && Array.isArray(keywords[key]) && keywords[key].length > 0
+  );
+
+  if (!hasKeywords) {
+    // Show basic keywords instead of loading
+    return (
+      <div className="keywords-tab">
+        <div className="keywords-header">
+          <h3>
+            <span className="section-icon">🏷️</span>
+            Medical Keywords for {condition || 'Your Analysis'}
+          </h3>
+          <p>Key medical terms related to your analysis</p>
+        </div>
+        
+        <div className="keywords-grid">
+          <div className="keyword-category">
+            <h4 className="category-title">
+              <span className="category-icon">🏥</span>
+              Conditions
+            </h4>
+            <div className="keyword-tags">
+              <span className="keyword-tag">
+                {condition?.toLowerCase() || 'skin condition'}
+              </span>
+              <span className="keyword-tag">skin lesion</span>
+              <span className="keyword-tag">dermatology</span>
+            </div>
+          </div>
+          
+          <div className="keyword-category">
+            <h4 className="category-title">
+              <span className="category-icon">🩺</span>
+              Procedures
+            </h4>
+            <div className="keyword-tags">
+              <span className="keyword-tag">clinical examination</span>
+              <span className="keyword-tag">dermatological consultation</span>
+              <span className="keyword-tag">medical evaluation</span>
+            </div>
+          </div>
+          
+          <div className="keyword-category">
+            <h4 className="category-title">
+              <span className="category-icon">💊</span>
+              Treatments
+            </h4>
+            <div className="keyword-tags">
+              <span className="keyword-tag">professional assessment</span>
+              <span className="keyword-tag">medical monitoring</span>
+              <span className="keyword-tag">preventive care</span>
+            </div>
+          </div>
+          
+          <div className="keyword-category">
+            <h4 className="category-title">
+              <span className="category-icon">📋</span>
+              General
+            </h4>
+            <div className="keyword-tags">
+              <span className="keyword-tag">skin health</span>
+              <span className="keyword-tag">medical diagnosis</span>
+              <span className="keyword-tag">healthcare</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasKeywords) {
+    return (
+      <div className="no-data-container">
+        <div className="no-data-icon">🏷️</div>
+        <h3>Extracting Medical Keywords...</h3>
+        <p>Medical keywords are being extracted from your analysis. This helps organize and understand the medical terminology.</p>
+        <div className="fallback-content">
+          <h4>Keyword Categories:</h4>
+          <ul>
+            <li><strong>Conditions:</strong> Medical diagnoses and conditions</li>
+            <li><strong>Symptoms:</strong> Clinical signs and symptoms</li>
+            <li><strong>Treatments:</strong> Treatment options and therapies</li>
+            <li><strong>Procedures:</strong> Medical procedures and tests</li>
+            <li><strong>General:</strong> Other relevant medical terms</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  const keywordCategories = [
+    { key: 'conditions', label: 'Medical Conditions', icon: '🏥', color: '#EF4444' },
+    { key: 'symptoms', label: 'Symptoms', icon: '🩺', color: '#F59E0B' },
+    { key: 'treatments', label: 'Treatments', icon: '💊', color: '#10B981' },
+    { key: 'procedures', label: 'Procedures', icon: '🔬', color: '#3B82F6' },
+    { key: 'general', label: 'General Terms', icon: '📋', color: '#6B7280' }
+  ];
+
+  return (
+    <div className="keywords-tab">
+      <div className="keywords-intro">
+        <h3>
+          <span className="section-icon">🏷️</span>
+          Medical Keywords
+        </h3>
+        <p>Key medical terms extracted from your analysis results</p>
+      </div>
+      
+      <div className="keywords-grid">
+        {keywordCategories.map(category => {
+          const categoryKeywords = keywords[category.key] || [];
+          
+          if (categoryKeywords.length === 0) return null;
+          
+          return (
+            <div key={category.key} className="keyword-category">
+              <h4 className="category-header">
+                <span className="category-icon">{category.icon}</span>
+                {category.label}
+                <span className="keyword-count">({categoryKeywords.length})</span>
+              </h4>
+              <div className="keyword-tags">
+                {categoryKeywords.map((keyword, index) => (
+                  <span 
+                    key={index} 
+                    className="keyword-tag"
+                    style={{ borderColor: category.color, color: category.color }}
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      
+      {keywords.extracted_at && (
+        <div className="extraction-info">
+          <small>Keywords extracted: {new Date(keywords.extracted_at).toLocaleString()}</small>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Helper function to format confidence
+const formatConfidence = (confidence) => {
+  return `${(confidence * 100).toFixed(1)}%`;
+};
+
+export default SkinAnalysisResults;

@@ -1,7 +1,10 @@
 // Results + risk display dashboard component
-import React from 'react';
+import React, { useState } from 'react';
+import SkinAnalysisResults from './SkinAnalysisResults';
 
-const Dashboard = ({ analysisResults, triageResults, analysisType }) => {
+const Dashboard = ({ analysisResults, triageResults, analysisType, uploadedImage }) => {
+  const [activeSection, setActiveSection] = useState('analysis');
+
   const getRiskColor = (riskLevel) => {
     switch (riskLevel?.toLowerCase()) {
       case 'low': return '#28a745';
@@ -22,61 +25,11 @@ const Dashboard = ({ analysisResults, triageResults, analysisType }) => {
   };
 
   const renderSkinAnalysisResults = () => {
-    if (!analysisResults) return null;
-
     return (
-      <div className="analysis-section">
-        <h3>🔬 Skin Lesion Analysis Results</h3>
-        
-        <div className="result-cards">
-          <div className="result-card primary">
-            <h4>Diagnosis</h4>
-            <p className="diagnosis">{analysisResults.prediction}</p>
-            <div className="confidence-bar">
-              <div 
-                className="confidence-fill"
-                style={{ width: `${analysisResults.confidence * 100}%` }}
-              ></div>
-            </div>
-            <p className="confidence-text">
-              Confidence: {(analysisResults.confidence * 100).toFixed(1)}%
-            </p>
-          </div>
-
-          <div className="result-card risk">
-            <h4>Risk Level</h4>
-            <div 
-              className="risk-indicator"
-              style={{ backgroundColor: getRiskColor(analysisResults.risk_level) }}
-            >
-              {analysisResults.risk_level?.toUpperCase()}
-            </div>
-          </div>
-        </div>
-
-        <div className="lesion-characteristics">
-          <h4>Lesion Characteristics</h4>
-          <div className="characteristics-grid">
-            {Object.entries(analysisResults.lesion_characteristics || {}).map(([key, value]) => (
-              <div key={key} className="characteristic-item">
-                <span className="characteristic-label">
-                  {key.replace('_', ' ').toUpperCase()}:
-                </span>
-                <span className="characteristic-value">{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="recommendations">
-          <h4>📋 Recommendations</h4>
-          <ul>
-            {analysisResults.recommendations?.map((rec, index) => (
-              <li key={index}>{rec}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <SkinAnalysisResults 
+        analysisResult={analysisResults} 
+        uploadedImage={uploadedImage}
+      />
     );
   };
 
@@ -221,8 +174,16 @@ const Dashboard = ({ analysisResults, triageResults, analysisType }) => {
   if (!analysisResults && !triageResults) {
     return (
       <div className="dashboard-empty">
-        <h3>No Results Available</h3>
-        <p>Upload an image or complete a triage assessment to see results here.</p>
+        <div className="empty-content">
+          <div className="empty-icon">📊</div>
+          <h3>Welcome to MediScan-AI Dashboard</h3>
+          <p>Upload an image or complete a triage assessment to see AI-powered medical analysis results.</p>
+          <div className="empty-actions">
+            <button className="btn btn-primary" onClick={() => setActiveSection('upload')}>
+              Start Analysis
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -231,33 +192,39 @@ const Dashboard = ({ analysisResults, triageResults, analysisType }) => {
     <div className="dashboard-container">
       {renderEmergencyAlert()}
       
-      <div className="dashboard-header">
-        <h2>📊 Analysis Dashboard</h2>
-        <p className="analysis-timestamp">
-          Analysis completed: {new Date().toLocaleString()}
-        </p>
-      </div>
-
+      {/* Enhanced Analysis Results */}
       <div className="dashboard-content">
         {analysisType === 'skin' && renderSkinAnalysisResults()}
         {analysisType === 'radiology' && renderRadiologyResults()}
         {renderTriageResults()}
       </div>
 
+      {/* Action Footer */}
       <div className="dashboard-footer">
         <div className="disclaimer">
-          <h4>⚠️ Important Disclaimer</h4>
-          <p>
-            This analysis is for informational purposes only and should not replace 
-            professional medical advice, diagnosis, or treatment. Always consult with 
-            a qualified healthcare provider for medical concerns.
-          </p>
+          <div className="disclaimer-content">
+            <h4>⚠️ Important Medical Disclaimer</h4>
+            <p>
+              This AI analysis is for informational and educational purposes only. It should not replace 
+              professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare 
+              providers for medical concerns. In case of emergency, call emergency services immediately.
+            </p>
+          </div>
         </div>
 
         <div className="actions">
-          <button className="btn btn-primary">Save Results</button>
-          <button className="btn btn-secondary">Share with Doctor</button>
-          <button className="btn btn-outline">Print Report</button>
+          <button className="btn btn-primary">
+            <span>💾</span> Save Results
+          </button>
+          <button className="btn btn-secondary">
+            <span>👨‍⚕️</span> Share with Doctor
+          </button>
+          <button className="btn btn-outline">
+            <span>🖨️</span> Generate Report
+          </button>
+          <button className="btn btn-outline">
+            <span>🔄</span> New Analysis
+          </button>
         </div>
       </div>
     </div>

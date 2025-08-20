@@ -4,6 +4,9 @@ uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 pydantic==2.5.0
 
+# HTTP client for API integrations
+aiohttp==3.9.1
+
 # AI/ML dependencies
 torch==2.1.0
 torchvision==0.16.0

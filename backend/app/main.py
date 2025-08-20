@@ -122,6 +122,13 @@ try:
 except ImportError as e:
     logger.warning(f"Could not import reports routes: {e}")
 
+try:
+    from app.routes import test_api
+    app.include_router(test_api.router, prefix="/api/v1/test", tags=["testing"])
+    logger.info("Test API routes loaded")
+except ImportError as e:
+    logger.warning(f"Could not import test API routes: {e}")
+
 @app.get("/")
 async def root():
     return {

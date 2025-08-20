@@ -10,6 +10,9 @@ import torchvision.transforms as transforms
 from typing import Optional
 import json
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.models.schemas import (
     SkinAnalysisResult, SkinLesionCharacteristics, VisualOverlay,
@@ -99,25 +102,46 @@ async def analyze_skin_lesion(
             image, predictions, analysis_id
         )
         
-        # Analyze lesion characteristics
-        characteristics = await _analyze_lesion_characteristics(image, predictions)
+        # Generate visual overlay (optional)
+        visual_overlay = await _generate_visual_overlay(image, predictions)
         
         # Determine risk level and recommendations
         risk_level, recommendations, next_steps = await _generate_skin_recommendations(
-            predictions, characteristics, "patient", language
+            predictions, None, "patient", language  # No characteristics needed
         )
         
-        # Create analysis result
+        # Generate dynamic insights based on top prediction
+        from app.services.dynamic_insights_service import DynamicInsightsService
+        insights_service = DynamicInsightsService()
+        
+        logger.info(f"Generating dynamic insights for {predictions['top_class']} ({predictions['confidence']:.1%})")
+        
+        # Generate prediction-based insights
+        insights = await insights_service.generate_prediction_insights(
+            top_prediction=predictions["top_class"],
+            confidence=predictions["confidence"],
+            risk_level=risk_level.value,
+            recommendations=recommendations
+        )
+        
+        logger.info("Dynamic insights generation completed")
+        
+        # Create analysis result without ABCDE characteristics
         result = SkinAnalysisResult(
             analysis_id=analysis_id,
             predictions=predictions["probabilities"],
             top_prediction=predictions["top_class"],
             confidence=predictions["confidence"],
             risk_level=risk_level,
-            characteristics=characteristics,
+            characteristics=None,  # Remove ABCDE characteristics
             visual_overlay=visual_overlay,
             recommendations=recommendations,
-            next_steps=next_steps
+            next_steps=next_steps,
+            # Enhanced insights based on prediction
+            ai_summary=insights.get("ai_summary", {}),
+            medical_resources=insights.get("medical_resources", {}),
+            keywords=insights.get("keywords", {}),
+            enhancement_timestamp=insights.get("generated_at", datetime.utcnow().isoformat())
         )
         
         # Store analysis result
@@ -256,28 +280,9 @@ async def _create_overlay_image(
     
     return overlay_path
 
-async def _analyze_lesion_characteristics(
-    image: Image.Image, 
-    predictions: dict
-) -> SkinLesionCharacteristics:
-    """Analyze ABCDE characteristics of the lesion."""
-    
-    # This would typically use specialized models for each characteristic
-    # For now, we'll use placeholder values based on the main prediction
-    
-    confidence = predictions.get("confidence", 0.5)
-    
-    return SkinLesionCharacteristics(
-        asymmetry_score=min(confidence * 1.2, 1.0),
-        border_irregularity=min(confidence * 1.1, 1.0),
-        color_variation=min(confidence * 0.9, 1.0),
-        diameter_mm=None,  # Would need reference object detection
-        evolution_risk=min(confidence * 1.3, 1.0)
-    )
-
 async def _generate_skin_recommendations(
     predictions: dict,
-    characteristics: SkinLesionCharacteristics,
+    characteristics: Optional[SkinLesionCharacteristics],
     user_role: str,
     language: Language
 ) -> tuple[SeverityLevel, list[str], list[str]]:

@@ -65,10 +65,16 @@ class SkinAnalysisResult(BaseModel):
     top_prediction: str = Field(..., description="Most likely condition")
     confidence: float = Field(..., ge=0, le=1, description="Overall confidence")
     risk_level: SeverityLevel = Field(..., description="Risk assessment")
-    characteristics: SkinLesionCharacteristics = Field(..., description="Lesion characteristics")
+    characteristics: Optional[SkinLesionCharacteristics] = Field(None, description="Lesion characteristics (optional)")
     visual_overlay: VisualOverlay = Field(..., description="Visual analysis overlay")
     recommendations: List[str] = Field(..., description="Medical recommendations")
     next_steps: List[str] = Field(..., description="Suggested next steps")
+    
+    # API Enhancement Fields
+    ai_summary: Optional[Dict[str, Any]] = Field(None, description="AI-generated summary and explanation")
+    medical_resources: Optional[Dict[str, Any]] = Field(None, description="Reference images and articles")
+    keywords: Optional[Dict[str, Any]] = Field(None, description="Extracted medical keywords")
+    enhancement_timestamp: Optional[str] = Field(None, description="When enhancements were generated")
 
 # Radiology Analysis Models
 class RadiologyFinding(BaseModel):
