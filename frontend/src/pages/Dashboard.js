@@ -192,7 +192,7 @@ const Dashboard = () => {
       textColor: 'text-secondary-600',
       buttonColor: 'btn-secondary',
       acceptedFiles: '.jpg,.jpeg,.png,.dcm,.dicom',
-      features: ['Multi-pathology Detection', 'Urgency Assessment', 'Clinical Findings']
+      features: ['AI Insights', 'Medical Resources', 'Keyword Extraction', 'Urgency Assessment']
     },
     {
       id: 'triage',
@@ -238,45 +238,176 @@ const Dashboard = () => {
               }`}>
                 {analysisResult.urgency_level?.toUpperCase()}
               </span>
-              {analysisResult.processing_time_seconds && (
+              {analysisResult.processing_time && (
                 <span className="text-xs text-neutral-500">
-                  {analysisResult.processing_time_seconds.toFixed(2)}s
+                  {analysisResult.processing_time}
+                </span>
+              )}
+              {analysisResult.radiology_enhanced && (
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                  AI Enhanced
                 </span>
               )}
             </div>
           </div>
 
           <div className="result-content">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium mb-2">Detected Findings</h4>
-                <div className="space-y-2">
-                  {analysisResult.findings?.map((finding, index) => (
-                    <div key={index} className="flex justify-between items-center p-2 bg-neutral-50 rounded">
-                      <span className="text-sm">{finding.condition}</span>
-                      <span className="text-xs font-medium">
-                        {(finding.probability * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                  ))}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Primary Results */}
+              <div className="space-y-6">
+                {/* Detected Findings */}
+                <div>
+                  <h4 className="font-semibold text-neutral-800 mb-3">Detected Findings</h4>
+                  <div className="space-y-2">
+                    {analysisResult.findings?.map((finding, index) => (
+                      <div key={index} className="bg-neutral-50 p-3 rounded border-l-4 border-blue-500">
+                        <div className="flex justify-between items-start">
+                          <span className="font-medium text-neutral-800">{finding.condition}</span>
+                          <span className="text-sm font-semibold text-blue-600 ml-2">
+                            ({(finding.probability * 100).toFixed(0)}% confidence)
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Clinical Summary */}
+                <div>
+                  <h4 className="font-semibold text-neutral-800 mb-3">Clinical Summary</h4>
+                  <div className="bg-neutral-50 p-4 rounded border">
+                    <p className="text-sm text-neutral-700 leading-relaxed">
+                      {analysisResult.clinical_summary}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Recommendations */}
+                <div>
+                  <h4 className="font-semibold text-neutral-800 mb-3">Recommendations</h4>
+                  <div className="bg-neutral-50 p-4 rounded border">
+                    <ul className="space-y-2">
+                      {analysisResult.recommendations?.map((rec, index) => (
+                        <li key={index} className="flex items-start gap-2 text-sm text-neutral-700">
+                          <span className="text-blue-500 font-bold mt-1">•</span>
+                          <span className="leading-relaxed">{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <h4 className="font-medium mb-2">Clinical Summary</h4>
-                <p className="text-sm text-neutral-600 mb-4">
-                  {analysisResult.clinical_summary}
-                </p>
+              {/* AI-Enhanced Content */}
+              <div className="space-y-6">
+                {/* AI Insights */}
+                {analysisResult.ai_summary && (
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-3">AI Insights</h4>
+                    <div className="bg-blue-50 border border-blue-200 rounded p-4 space-y-3">
+                      {analysisResult.ai_summary.summary && (
+                        <div>
+                          <p className="text-sm text-blue-800 leading-relaxed font-medium">
+                            {analysisResult.ai_summary.summary}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {analysisResult.ai_summary.explanation && (
+                        <div>
+                          <h5 className="text-xs font-semibold text-blue-900 mb-2">Medical Explanation</h5>
+                          <p className="text-xs text-blue-700 leading-relaxed">
+                            {analysisResult.ai_summary.explanation}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {analysisResult.ai_summary.confidence_interpretation && (
+                        <div className="border-t border-blue-200 pt-3">
+                          <h5 className="text-xs font-semibold text-blue-900 mb-1">Confidence Assessment</h5>
+                          <p className="text-xs text-blue-700">
+                            {analysisResult.ai_summary.confidence_interpretation}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
-                <h4 className="font-medium mb-2">Recommendations</h4>
-                <ul className="text-sm text-neutral-600 space-y-1">
-                  {analysisResult.recommendations?.map((rec, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <span className="text-primary-500 mt-1">•</span>
-                      {rec}
-                    </li>
-                  ))}
-                </ul>
+                {/* Medical Keywords */}
+                {analysisResult.keywords && (
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-3">Medical Keywords</h4>
+                    <div className="bg-green-50 border border-green-200 rounded p-4 space-y-3">
+                      {analysisResult.keywords.conditions && analysisResult.keywords.conditions.length > 0 && (
+                        <div>
+                          <span className="text-xs font-semibold text-green-800 block mb-2">Conditions:</span>
+                          <p className="text-sm text-green-700">
+                            {analysisResult.keywords.conditions.slice(0, 5).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {analysisResult.keywords.symptoms && analysisResult.keywords.symptoms.length > 0 && (
+                        <div>
+                          <span className="text-xs font-semibold text-green-800 block mb-2">Symptoms:</span>
+                          <p className="text-sm text-green-700">
+                            {analysisResult.keywords.symptoms.slice(0, 4).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {analysisResult.keywords.treatments && analysisResult.keywords.treatments.length > 0 && (
+                        <div>
+                          <span className="text-xs font-semibold text-green-800 block mb-2">Treatments:</span>
+                          <p className="text-sm text-green-700">
+                            {analysisResult.keywords.treatments.slice(0, 5).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {analysisResult.keywords.procedures && analysisResult.keywords.procedures.length > 0 && (
+                        <div>
+                          <span className="text-xs font-semibold text-green-800 block mb-2">Procedures:</span>
+                          <p className="text-sm text-green-700">
+                            {analysisResult.keywords.procedures.slice(0, 4).join(', ')}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Medical Resources */}
+                {analysisResult.medical_resources && analysisResult.medical_resources.medical_articles && (
+                  <div>
+                    <h4 className="font-semibold text-neutral-800 mb-3">Medical Resources</h4>
+                    <div className="bg-purple-50 border border-purple-200 rounded p-4">
+                      <div className="space-y-3">
+                        {analysisResult.medical_resources.medical_articles.slice(0, 3).map((article, index) => (
+                          <div key={index} className="border-b border-purple-200 last:border-b-0 pb-3 last:pb-0">
+                            <a 
+                              href={article.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-purple-700 hover:text-purple-900 font-medium text-sm hover:underline block mb-1"
+                            >
+                              {article.title}
+                            </a>
+                            <p className="text-xs text-purple-600">
+                              {article.source}
+                            </p>
+                            {article.snippet && (
+                              <p className="text-xs text-purple-600 mt-1 leading-relaxed">
+                                {article.snippet.length > 100 ? article.snippet.substring(0, 100) + '...' : article.snippet}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

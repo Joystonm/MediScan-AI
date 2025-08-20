@@ -1010,3 +1010,440 @@ class APIIntegrationService:
             "general": ["dermatology", "healthcare", "medical diagnosis"],
             "extracted_at": datetime.utcnow().isoformat()
         }
+
+
+# Add radiology-specific methods to existing services
+class GroqService(GroqService):
+    """Extended GROQ service with radiology support"""
+    
+    async def generate_radiology_summary(
+        self, 
+        finding: str, 
+        confidence: float, 
+        urgency_level: str,
+        scan_type: str,
+        clinical_summary: str
+    ) -> Dict[str, str]:
+        """Generate natural language summary of radiology analysis results"""
+        
+        if not self.api_key or self.api_key == "your_groq_api_key_here":
+            logger.warning("GROQ API key not configured properly")
+            return self._get_fallback_radiology_summary(finding, confidence, urgency_level, scan_type)
+        
+        try:
+            logger.info(f"Calling GROQ API for radiology finding: {finding}")
+            prompt = self._build_radiology_summary_prompt(finding, confidence, urgency_level, scan_type, clinical_summary)
+            
+            async with aiohttp.ClientSession() as session:
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                }
+                
+                payload = {
+                    "model": self.model,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are a medical AI assistant specializing in radiology. Provide clear, accurate explanations of imaging findings. Always include appropriate medical disclaimers and emphasize the need for professional medical evaluation."
+                        },
+                        {
+                            "role": "user", 
+                            "content": prompt
+                        }
+                    ],
+                    "max_tokens": 600,
+                    "temperature": 0.3
+                }
+                
+                async with session.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
+                    
+                    if response.status == 200:
+                        data = await response.json()
+                        summary = data["choices"][0]["message"]["content"]
+                        explanation = await self._generate_radiology_explanation(finding, scan_type)
+                        
+                        logger.info("GROQ API call successful for radiology")
+                        return {
+                            "summary": summary,
+                            "explanation": explanation,
+                            "confidence_interpretation": self._interpret_radiology_confidence(confidence),
+                            "urgency_interpretation": self._interpret_urgency_level(urgency_level),
+                            "clinical_significance": await self._get_clinical_significance(finding, urgency_level),
+                            "generated_at": datetime.utcnow().isoformat()
+                        }
+                    else:
+                        logger.error(f"GROQ API error for radiology: {response.status}")
+                        return self._get_fallback_radiology_summary(finding, confidence, urgency_level, scan_type)
+                        
+        except Exception as e:
+            logger.error(f"Error calling GROQ API for radiology: {str(e)}")
+            return self._get_fallback_radiology_summary(finding, confidence, urgency_level, scan_type)
+
+    def _build_radiology_summary_prompt(
+        self, 
+        finding: str, 
+        confidence: float, 
+        urgency_level: str, 
+        scan_type: str,
+        clinical_summary: str
+    ) -> str:
+        """Build prompt for radiology summary generation"""
+        
+        return f"""
+        Please provide a clear, patient-friendly explanation of this radiology finding:
+        
+        Finding: {finding}
+        Confidence: {confidence:.1%}
+        Urgency Level: {urgency_level}
+        Scan Type: {scan_type.replace('_', ' ').title()}
+        Clinical Summary: {clinical_summary}
+        
+        Please explain:
+        1. What this finding means in simple terms
+        2. Why this finding is classified as {urgency_level.lower()} priority
+        3. What patients should expect for next steps
+        4. Any important considerations or precautions
+        
+        Keep the explanation clear, reassuring where appropriate, but medically accurate.
+        Include a disclaimer that this is AI-generated information and professional medical evaluation is essential.
+        """
+
+    async def _generate_radiology_explanation(self, finding: str, scan_type: str) -> str:
+        """Generate detailed explanation of radiology finding"""
+        
+        explanations = {
+            "pneumonia": f"Pneumonia on {scan_type.replace('_', ' ')} appears as areas of increased density in the lung tissue, indicating inflammation and infection. This condition affects the air sacs in the lungs and typically requires antibiotic treatment.",
+            
+            "pneumothorax": f"Pneumothorax on {scan_type.replace('_', ' ')} shows air in the pleural space, causing partial or complete lung collapse. This condition can be life-threatening and may require immediate intervention.",
+            
+            "pleural effusion": f"Pleural effusion on {scan_type.replace('_', ' ')} indicates fluid accumulation around the lungs. This can result from various conditions and may cause breathing difficulties.",
+            
+            "cardiomegaly": f"Cardiomegaly on {scan_type.replace('_', ' ')} shows an enlarged heart shadow, which may indicate underlying heart disease requiring cardiac evaluation.",
+            
+            "pulmonary nodule": f"A pulmonary nodule on {scan_type.replace('_', ' ')} appears as a small, round spot in the lung. Most nodules are benign, but evaluation is important to rule out malignancy.",
+            
+            "mass": f"A pulmonary mass on {scan_type.replace('_', ' ')} is a larger lesion that requires urgent evaluation to determine its nature and appropriate treatment."
+        }
+        
+        finding_lower = finding.lower()
+        for condition, explanation in explanations.items():
+            if condition in finding_lower:
+                return explanation
+        
+        return f"This finding on {scan_type.replace('_', ' ')} requires professional radiological interpretation to determine its clinical significance and appropriate management."
+
+    def _get_fallback_radiology_summary(
+        self, 
+        finding: str, 
+        confidence: float, 
+        urgency_level: str, 
+        scan_type: str
+    ) -> Dict[str, str]:
+        """Get fallback summary for radiology findings"""
+        
+        return {
+            "summary": f"Radiology analysis identified {finding} with {confidence:.1%} confidence on {scan_type.replace('_', ' ')}. This {urgency_level.lower()} priority finding requires appropriate medical evaluation and follow-up care.",
+            "explanation": f"Professional radiological interpretation is recommended for {finding}. A qualified radiologist can provide detailed analysis and recommend appropriate next steps.",
+            "confidence_interpretation": self._interpret_radiology_confidence(confidence),
+            "urgency_interpretation": self._interpret_urgency_level(urgency_level),
+            "clinical_significance": f"This {urgency_level.lower()} priority finding requires medical attention according to established clinical guidelines.",
+            "generated_at": datetime.utcnow().isoformat()
+        }
+
+    def _interpret_radiology_confidence(self, confidence: float) -> str:
+        """Interpret confidence level for radiology findings"""
+        if confidence >= 0.8:
+            return f"High confidence ({confidence:.1%}) - The AI model shows strong certainty based on clear imaging features."
+        elif confidence >= 0.6:
+            return f"Good confidence ({confidence:.1%}) - The assessment shows reasonable certainty with professional confirmation recommended."
+        elif confidence >= 0.4:
+            return f"Moderate confidence ({confidence:.1%}) - Some uncertainty exists, making professional radiological review important."
+        else:
+            return f"Low confidence ({confidence:.1%}) - Significant uncertainty requires expert radiological interpretation."
+
+    def _interpret_urgency_level(self, urgency_level: str) -> str:
+        """Interpret urgency level for patients"""
+        urgency_interpretations = {
+            "emergency": "Emergency - Immediate medical attention required within minutes to hours",
+            "urgent": "Urgent - Medical evaluation needed within 24-48 hours", 
+            "routine": "Routine - Follow-up as clinically indicated, typically within days to weeks",
+            "follow-up": "Follow-up - Scheduled monitoring or additional evaluation recommended"
+        }
+        return urgency_interpretations.get(urgency_level.lower(), f"Medical evaluation recommended based on {urgency_level} classification")
+
+    async def _get_clinical_significance(self, finding: str, urgency_level: str) -> str:
+        """Get clinical significance of the finding"""
+        
+        significance_map = {
+            "pneumonia": "Requires prompt antibiotic treatment and respiratory monitoring",
+            "pneumothorax": "May require emergency chest tube placement depending on severity",
+            "pleural effusion": "May need thoracentesis for diagnosis and symptom relief",
+            "cardiomegaly": "Requires cardiac evaluation and possible echocardiography",
+            "pulmonary nodule": "Needs follow-up imaging per established guidelines",
+            "mass": "Requires urgent multidisciplinary evaluation and possible biopsy"
+        }
+        
+        finding_lower = finding.lower()
+        for condition, significance in significance_map.items():
+            if condition in finding_lower:
+                return significance
+        
+        return f"Clinical significance depends on patient symptoms and history - {urgency_level.lower()} priority evaluation recommended"
+
+
+class TavilyService(TavilyService):
+    """Extended Tavily service with radiology support"""
+    
+    async def fetch_radiology_resources(self, condition: str, scan_type: str) -> Dict[str, Any]:
+        """Fetch radiology-specific medical resources"""
+        
+        if not self.api_key or self.api_key == "your_tavily_api_key_here":
+            logger.warning("Tavily API key not configured properly")
+            return self._get_fallback_radiology_resources(condition, scan_type)
+        
+        try:
+            logger.info(f"Fetching radiology resources for {condition} on {scan_type}")
+            
+            # Fetch medical articles with radiology focus
+            articles = await self._fetch_radiology_articles(condition, scan_type)
+            
+            logger.info(f"Tavily radiology API call completed: {len(articles)} articles")
+            return {
+                "reference_images": [],  # Skip images for faster loading
+                "medical_articles": articles,
+                "educational_resources": self._get_radiology_educational_resources(condition, scan_type),
+                "fetched_at": datetime.utcnow().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error fetching radiology resources: {str(e)}")
+            return self._get_fallback_radiology_resources(condition, scan_type)
+
+    async def _fetch_radiology_articles(self, condition: str, scan_type: str) -> List[Dict[str, Any]]:
+        """Fetch radiology-specific medical articles"""
+        
+        try:
+            # Optimized query for radiology resources
+            query = f"{condition} {scan_type} radiology imaging diagnosis treatment"
+            
+            async with aiohttp.ClientSession() as session:
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                }
+                
+                payload = {
+                    "query": query,
+                    "search_depth": "basic",
+                    "include_images": False,
+                    "max_results": 5,
+                    "include_domains": [
+                        "radiologyinfo.org",
+                        "acr.org",
+                        "mayoclinic.org",
+                        "medlineplus.gov",
+                        "healthline.com"
+                    ]
+                }
+                
+                async with session.post(
+                    f"{self.base_url}/search",
+                    headers=headers,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=8)
+                ) as response:
+                    
+                    if response.status == 200:
+                        data = await response.json()
+                        articles = []
+                        
+                        for result in data.get("results", [])[:4]:
+                            articles.append({
+                                "title": result.get("title", f"Radiology Information: {condition}"),
+                                "url": result.get("url"),
+                                "source": result.get("source", "Medical Source"),
+                                "snippet": result.get("content", "")[:200] + "..." if result.get("content") else f"Radiology information about {condition}",
+                                "published_date": result.get("published_date"),
+                                "relevance_score": result.get("score", 0.8),
+                                "content_type": "radiology_article"
+                            })
+                        
+                        return articles
+                    else:
+                        logger.warning(f"Tavily radiology API returned status {response.status}")
+                        return []
+                        
+        except Exception as e:
+            logger.error(f"Error fetching radiology articles: {str(e)}")
+            return []
+
+    def _get_radiology_educational_resources(self, condition: str, scan_type: str) -> List[Dict[str, Any]]:
+        """Get educational resources for radiology findings"""
+        
+        return [
+            {
+                "title": f"Understanding {scan_type.replace('_', ' ').title()} Results",
+                "description": f"Patient guide to interpreting {scan_type.replace('_', ' ')} findings",
+                "type": "patient_education",
+                "source": "Radiology Patient Education"
+            },
+            {
+                "title": f"{condition.title()} - What You Need to Know",
+                "description": f"Comprehensive information about {condition} and treatment options",
+                "type": "condition_guide",
+                "source": "Medical Education Database"
+            },
+            {
+                "title": "Questions to Ask Your Doctor",
+                "description": "Prepared questions for discussing your radiology results",
+                "type": "consultation_prep",
+                "source": "Patient Advocacy Resources"
+            }
+        ]
+
+    def _get_fallback_radiology_resources(self, condition: str, scan_type: str) -> Dict[str, Any]:
+        """Get fallback radiology resources"""
+        
+        fallback_articles = [
+            {
+                "title": f"Understanding {condition} on {scan_type.replace('_', ' ').title()}",
+                "url": "https://www.radiologyinfo.org/",
+                "source": "RadiologyInfo.org",
+                "snippet": f"Comprehensive information about {condition} findings on {scan_type.replace('_', ' ')} imaging.",
+                "relevance_score": 0.9,
+                "content_type": "radiology_reference"
+            },
+            {
+                "title": f"{scan_type.replace('_', ' ').title()} Imaging Guide",
+                "url": "https://www.acr.org/",
+                "source": "American College of Radiology",
+                "snippet": f"Professional guidelines for {scan_type.replace('_', ' ')} interpretation and patient care.",
+                "relevance_score": 0.85,
+                "content_type": "clinical_guidelines"
+            }
+        ]
+        
+        return {
+            "reference_images": [],
+            "medical_articles": fallback_articles,
+            "educational_resources": self._get_radiology_educational_resources(condition, scan_type),
+            "fetched_at": datetime.utcnow().isoformat()
+        }
+
+
+class KeywordAIService(KeywordAIService):
+    """Extended Keyword AI service with radiology support"""
+    
+    async def extract_radiology_keywords(
+        self, 
+        text_content: List[str],
+        finding: str
+    ) -> Dict[str, List[str]]:
+        """Extract radiology-specific medical keywords"""
+        
+        # Use optimized fallback for faster response
+        return self._get_fallback_radiology_keywords(text_content, finding)
+    
+    def _get_fallback_radiology_keywords(self, text_content: List[str], finding: str) -> Dict[str, List[str]]:
+        """Generate radiology-specific keywords using local processing"""
+        
+        # Combine all text content
+        combined_text = " ".join(text_content).lower()
+        
+        # Radiology-specific keyword database
+        radiology_keywords = {
+            "conditions": [
+                "pneumonia", "pneumothorax", "pleural effusion", "cardiomegaly",
+                "pulmonary nodule", "mass", "consolidation", "atelectasis",
+                "infiltrate", "opacity", "lesion", "abnormality"
+            ],
+            "symptoms": [
+                "opacity", "consolidation", "air space disease", "ground glass",
+                "nodular", "mass-like", "cystic", "cavitary", "bilateral",
+                "unilateral", "upper lobe", "lower lobe", "hilar", "peripheral"
+            ],
+            "treatments": [
+                "antibiotics", "chest tube", "thoracentesis", "drainage",
+                "surgery", "biopsy", "bronchoscopy", "intubation",
+                "oxygen therapy", "mechanical ventilation"
+            ],
+            "procedures": [
+                "chest x-ray", "CT scan", "MRI", "ultrasound", "fluoroscopy",
+                "angiography", "biopsy", "thoracentesis", "bronchoscopy",
+                "chest tube insertion", "VATS", "thoracotomy"
+            ],
+            "general": [
+                "radiology", "imaging", "diagnostic", "pathology", "anatomy",
+                "physiology", "respiratory", "cardiac", "thoracic", "pulmonary",
+                "mediastinal", "pleural", "parenchymal"
+            ]
+        }
+        
+        # Extract keywords that appear in the text content
+        extracted_keywords = {
+            "conditions": [],
+            "symptoms": [],
+            "treatments": [],
+            "procedures": [],
+            "general": []
+        }
+        
+        # Extract keywords by category
+        for category, keywords in radiology_keywords.items():
+            for keyword in keywords:
+                if self._keyword_matches(keyword.lower(), combined_text):
+                    if keyword not in extracted_keywords[category]:
+                        extracted_keywords[category].append(keyword)
+        
+        # Add finding-specific keywords
+        finding_keywords = self._get_finding_specific_keywords(finding.lower())
+        for category, keywords in finding_keywords.items():
+            extracted_keywords[category].extend(keywords)
+            # Remove duplicates while preserving order
+            extracted_keywords[category] = list(dict.fromkeys(extracted_keywords[category]))
+        
+        # Limit keywords per category
+        for category in extracted_keywords:
+            extracted_keywords[category] = extracted_keywords[category][:6]
+        
+        return {
+            **extracted_keywords,
+            "extracted_at": datetime.utcnow().isoformat()
+        }
+    
+    def _get_finding_specific_keywords(self, finding: str) -> Dict[str, List[str]]:
+        """Get keywords specific to the radiology finding"""
+        
+        finding_keywords = {
+            "pneumonia": {
+                "conditions": ["bacterial pneumonia", "viral pneumonia", "community acquired"],
+                "symptoms": ["consolidation", "air bronchograms", "infiltrate"],
+                "treatments": ["antibiotics", "supportive care", "oxygen"],
+                "procedures": ["sputum culture", "blood culture", "chest CT"]
+            },
+            "pneumothorax": {
+                "conditions": ["spontaneous pneumothorax", "tension pneumothorax"],
+                "symptoms": ["lung collapse", "pleural air", "mediastinal shift"],
+                "treatments": ["chest tube", "needle decompression", "surgery"],
+                "procedures": ["chest tube insertion", "thoracostomy", "VATS"]
+            },
+            "pleural effusion": {
+                "conditions": ["transudative", "exudative", "bilateral effusion"],
+                "symptoms": ["blunted costophrenic angles", "fluid level"],
+                "treatments": ["thoracentesis", "chest tube", "pleurodesis"],
+                "procedures": ["diagnostic tap", "therapeutic drainage"]
+            }
+        }
+        
+        # Find matching keywords
+        for condition, keywords in finding_keywords.items():
+            if condition in finding:
+                return keywords
+        
+        return {"conditions": [], "symptoms": [], "treatments": [], "procedures": []}
