@@ -262,7 +262,6 @@ const About = () => {
               { name: 'PyTorch', category: 'Deep Learning' },
               { name: 'FastAPI', category: 'Backend' },
               { name: 'React', category: 'Frontend' },
-              { name: 'Docker', category: 'DevOps' },
               { name: 'AWS', category: 'Cloud' },
               { name: 'PostgreSQL', category: 'Database' }
             ].map((tech, index) => (
