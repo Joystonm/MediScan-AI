@@ -4,22 +4,94 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 import uuid
 import json
+import logging
 
 from app.models.schemas import (
     TriageResult, ChatResponse, SymptomInput, ChatMessage, 
     UrgencyLevel, Language, SuccessResponse
 )
 from app.services.triage_service import TriageService
+from app.services.triage_chat_service import TriageChatService
 from app.services.translation_service import TranslationService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 # Initialize services
 triage_service = TriageService()
+triage_chat_service = TriageChatService()
 translation_service = TranslationService()
 
 # In-memory storage for chat sessions (use database in production)
 chat_sessions: Dict[str, Dict[str, Any]] = {}
+
+@router.post("/chat")
+async def chat_with_triage_assistant(message: ChatMessage):
+    """
+    Enhanced chat with the virtual triage assistant using AI integrations.
+    Integrates GROQ, Tavily, and Keyword AI for intelligent responses.
+    """
+    
+    try:
+        logger.info(f"Processing triage chat message: {message.message[:50]}...")
+        
+        # Process the message with AI integrations
+        result = await triage_chat_service.process_chat_message(
+            message=message.message,
+            session_id=message.session_id or str(uuid.uuid4()),
+            user_context=getattr(message, 'context', None)
+        )
+        
+        # Format response for frontend with backward compatibility
+        response = {
+            "message": result["response"],
+            "response": result["response"],  # Backward compatibility
+            "session_id": result["session_id"],
+            "urgency_level": result["urgency_level"],
+            "extracted_symptoms": result.get("extracted_symptoms", []),
+            "medical_keywords": result.get("medical_keywords", []),
+            "follow_up_questions": result.get("assessment_questions", result.get("follow_up_questions", [])),
+            "medical_resources": result.get("medical_resources", []),
+            "conversation_length": result.get("conversation_length", 1),
+            "timestamp": result.get("generated_at", datetime.utcnow().isoformat()),
+            "ai_enhanced": result.get("ai_enhanced", True),
+            "assessment_data": result.get("assessment_data", {})
+        }
+        
+        logger.info(f"Triage chat response generated successfully - urgency: {result.get('urgency_level', 'unknown')}")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Triage chat error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Chat processing failed: {str(e)}"
+        )
+
+@router.get("/chat/session/{session_id}")
+async def get_chat_session(session_id: str):
+    """Get chat session summary and history."""
+    
+    try:
+        session_summary = triage_chat_service.get_session_summary(session_id)
+        
+        if not session_summary:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Chat session not found"
+            )
+        
+        return session_summary
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error retrieving chat session: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve chat session: {str(e)}"
+        )
 
 @router.post("/assess")
 async def perform_triage_assessment(symptom_input: SymptomInput):

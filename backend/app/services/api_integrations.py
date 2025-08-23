@@ -1177,24 +1177,82 @@ class GroqService(GroqService):
         }
         return urgency_interpretations.get(urgency_level.lower(), f"Medical evaluation recommended based on {urgency_level} classification")
 
-    async def _get_clinical_significance(self, finding: str, urgency_level: str) -> str:
-        """Get clinical significance of the finding"""
+    async def generate_triage_response(
+        self, 
+        prompt: str, 
+        urgency_level: str,
+        conversation_context: List[Dict] = None
+    ) -> Dict[str, str]:
+        """Generate triage chat response using GROQ API"""
         
-        significance_map = {
-            "pneumonia": "Requires prompt antibiotic treatment and respiratory monitoring",
-            "pneumothorax": "May require emergency chest tube placement depending on severity",
-            "pleural effusion": "May need thoracentesis for diagnosis and symptom relief",
-            "cardiomegaly": "Requires cardiac evaluation and possible echocardiography",
-            "pulmonary nodule": "Needs follow-up imaging per established guidelines",
-            "mass": "Requires urgent multidisciplinary evaluation and possible biopsy"
+        if not self.api_key or self.api_key == "your_groq_api_key_here":
+            logger.warning("GROQ API key not configured properly")
+            return self._get_fallback_triage_response(urgency_level)
+        
+        try:
+            logger.info(f"Calling GROQ API for triage response - urgency: {urgency_level}")
+            
+            async with aiohttp.ClientSession() as session:
+                headers = {
+                    "Authorization": f"Bearer {self.api_key}",
+                    "Content-Type": "application/json"
+                }
+                
+                payload = {
+                    "model": self.model,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are a professional medical triage assistant. Provide compassionate, accurate medical guidance while emphasizing the importance of professional medical care. Always include appropriate disclaimers for emergency situations."
+                        },
+                        {
+                            "role": "user", 
+                            "content": prompt
+                        }
+                    ],
+                    "max_tokens": 400,
+                    "temperature": 0.3
+                }
+                
+                async with session.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=15)
+                ) as response:
+                    
+                    if response.status == 200:
+                        data = await response.json()
+                        triage_response = data["choices"][0]["message"]["content"]
+                        
+                        logger.info("GROQ API call successful for triage")
+                        return {
+                            "response": triage_response,
+                            "urgency_level": urgency_level,
+                            "generated_at": datetime.utcnow().isoformat()
+                        }
+                    else:
+                        logger.error(f"GROQ API error for triage: {response.status}")
+                        return self._get_fallback_triage_response(urgency_level)
+                        
+        except Exception as e:
+            logger.error(f"Error calling GROQ API for triage: {str(e)}")
+            return self._get_fallback_triage_response(urgency_level)
+
+    def _get_fallback_triage_response(self, urgency_level: str) -> Dict[str, str]:
+        """Get fallback triage response when GROQ API fails"""
+        
+        responses = {
+            "emergency": "Based on your symptoms, this could be a medical emergency. Please call 911 or go to the nearest emergency room immediately. Do not delay seeking medical care.",
+            "urgent": "I understand your concern about these symptoms. Based on what you've described, I recommend contacting your healthcare provider or visiting an urgent care center within the next 24 hours for proper evaluation.",
+            "routine": "Thank you for sharing your symptoms with me. While these don't appear to be immediately urgent, I recommend monitoring them and contacting your healthcare provider if they worsen or persist."
         }
         
-        finding_lower = finding.lower()
-        for condition, significance in significance_map.items():
-            if condition in finding_lower:
-                return significance
-        
-        return f"Clinical significance depends on patient symptoms and history - {urgency_level.lower()} priority evaluation recommended"
+        return {
+            "response": responses.get(urgency_level, responses["routine"]),
+            "urgency_level": urgency_level,
+            "generated_at": datetime.utcnow().isoformat()
+        }
 
 
 class TavilyService(TavilyService):

@@ -119,6 +119,8 @@ class TriageResult(BaseModel):
 
 class ChatMessage(BaseModel):
     message: str = Field(..., description="Chat message")
+    session_id: Optional[str] = Field(None, description="Chat session ID")
+    timestamp: Optional[str] = Field(None, description="Message timestamp")
     language: Language = Field(default=Language.EN, description="Message language")
     context: Optional[Dict[str, Any]] = Field(None, description="Additional context")
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import SkinAnalysisResults from '../components/SkinAnalysisResults';
+import TriageChat from '../components/TriageChat';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -207,7 +208,7 @@ const Dashboard = () => {
       bgColor: 'bg-info-100',
       textColor: 'text-info-600',
       buttonColor: 'btn-outline',
-      features: ['Symptom Analysis', 'Urgency Triage', 'Medical Guidance']
+      features: ['AI Chat Assistant', 'Symptom Analysis', 'Medical Guidance', 'Urgency Assessment']
     }
   ];
 
@@ -547,42 +548,7 @@ const Dashboard = () => {
   );
 
   const renderTriageArea = () => {
-    return (
-      <div className="triage-section">
-        <div className="triage-input">
-          <label className="block text-sm font-medium mb-2">
-            Describe your symptoms or medical concerns:
-          </label>
-          <textarea
-            value={triageMessage}
-            onChange={(e) => setTriageMessage(e.target.value)}
-            placeholder="Please describe your symptoms, their duration, severity, and any other relevant details..."
-            className="w-full p-3 border border-neutral-300 rounded-lg resize-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            rows={4}
-          />
-        </div>
-
-        <div className="triage-actions">
-          <button
-            onClick={() => handleTriageSubmit(triageMessage)}
-            disabled={isAnalyzing || !triageMessage.trim()}
-            className={`btn btn-outline ${isAnalyzing ? 'loading' : ''}`}
-          >
-            {isAnalyzing ? (
-              <>
-                <span className="loading-spinner"></span>
-                Assessing...
-              </>
-            ) : (
-              <>
-                <span>🩺</span>
-                Get Triage Assessment
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-    );
+    return <TriageChat />;
   };
 
   return (
